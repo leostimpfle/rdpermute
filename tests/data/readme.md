@@ -1,0 +1,1 @@
+.dta files obtained from the Stata package [rdpermute](https://github.com/ganong-noel/rdpermute/tree/8ae72bc299e496b48cd0a5203330cb4656c3922a/example_data) published under the MIT License

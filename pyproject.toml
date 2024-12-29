@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "rdpermute"
+version = "0.1.0"
+description = "Perform permutation test proposed by Ganong and Jäger (2018) https://www.tandfonline.com/doi/full/10.1080/01621459.2017.1328356"
+authors = ["leostimpfle <leonardstimpfle@icloud.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+rdrobust = "^1.3.0"
+stata-setup = {version = "^0.1.3", optional = true}
+jupyter-console = {version = "^6.6.3", optional = true}
+pytest = {version = "^8.3.4", optional = true}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+stata-setup = "^0.1.3"
+jupyter-console = "^6.6.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
