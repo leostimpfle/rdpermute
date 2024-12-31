@@ -32,6 +32,7 @@ def rdpermute(
         number_workers: typing.Optional[int] = -1,
         masspoints: MassPoints = MassPoints.off,
         estimation: EstimationProcedure = EstimationProcedure.robust,
+        max_iter: int = 1_00,
 ) -> typing.Tuple[pd.Series, pd.DataFrame]:
     """
     Perform permutation test proposed by Ganong and Jäger (2018) https://www.tandfonline.com/doi/full/10.1080/01621459.2017.1328356
@@ -78,6 +79,8 @@ def rdpermute(
         Check and control for repeated observations in the running variable
     estimation: EstimationProcedure
         Estimation procedure used in rdrobust
+    max_iter: int
+        Maximum number of iterations in the construction of confidence intervals
 
     Returns
     -------
@@ -116,6 +119,7 @@ def rdpermute(
             se_asymptotic=results.loc['SE'],
             regression_type=regression_type,
             alpha=alpha,
+            max_iter=max_iter,
         )
         results = pd.concat([results, confidence_interval], axis=0)
     results.rename(estimation.value, inplace=True)
@@ -330,6 +334,7 @@ def _randomization_interval(
         alpha: typing.Optional[float] = 0.05,
         size_multiplicator: float = 10,
         convergence_threshold: float = 0.05,
+        max_iter: int = 1_00,
 ) -> pd.Series:
     # following Appendix C of (Ganong and Jäger, 2018)
     # https://www.tandfonline.com/doi/full/10.1080/01621459.2017.1328356
@@ -346,6 +351,7 @@ def _randomization_interval(
             size_multiplicator=size_multiplicator,
             alpha=alpha,
             regression_type=regression_type,
+            max_iter=max_iter,
         ) for bound in Bound
     }
     # step 2: bisection method
@@ -360,7 +366,10 @@ def _randomization_interval(
         order = bound_enum.value
         interval = [beta_asymptotic, bound_value][::order]  # reverse if left bound
         treatment_effect = 0.5 * (interval[0] + interval[1])
-        while True:
+        converged = False
+        iteration = 0
+        while iteration < max_iter:
+            iteration += 1
             y_transformed = _transform(
                 y=y,
                 x=x,
@@ -383,7 +392,13 @@ def _randomization_interval(
             treatment_effect_old = treatment_effect
             treatment_effect = 0.5 * (interval[0] + interval[1])
             if abs(treatment_effect - treatment_effect_old) < convergence_threshold:
+                converged = True
                 break
+
+        if not converged:
+            raise ConvergenceError(
+                'Maximum number of iterations reached before convergence.'
+            )
         confidence_interval.update(
             {f'ci {bound_enum.name} {1-alpha:.1%} (randomization)': treatment_effect}
         )
@@ -402,9 +417,13 @@ def _get_bound(
         size_multiplicator: float = 10,
         alpha: float = 0.05,
         regression_type: RegressionType = RegressionType.RKD,
+        max_iter: int = 1_00,
 ) -> float:
     beta = se_asymptotic
-    while True:
+    converged = False
+    iteration = 0
+    while iteration < max_iter:
+        iteration += 1
         beta *= size_multiplicator
         treatment_effect = _update_treatment_effect(
             beta=beta_asymptotic,
@@ -426,8 +445,12 @@ def _get_bound(
             regression_type=regression_type,
         )
         if tmp.loc[r'$p$-value (randomization)'] < alpha:
+            converged = True
             break
-
+    if not converged:
+        raise ConvergenceError(
+            'Maximum number of iterations reached before convergence.'
+        )
     return treatment_effect
 
 
@@ -458,3 +481,7 @@ def _transform(
 
     transformed = np.where(x < cutoff, y, y - treatment)
     return transformed
+
+
+class ConvergenceError(Exception):
+    pass
