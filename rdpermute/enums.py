@@ -39,5 +39,25 @@ class Vce(enum.Enum):
     hc3 = enum.auto()  # heteroskedasticity-robust plug-in residuals variance estimator with hc3 weights
 
 
+class MassPoints(enum.Enum):
+    off = enum.auto()
+    check = enum.auto()
+    adjust = enum.auto()
+
+
 class BwSelectRdpermute(enum.Enum):
+    # TODO: implement alternatives
+    # fg = enum.auto()  # https://github.com/ganong-noel/rdpermute/blob/8ae72bc299e496b48cd0a5203330cb4656c3922a/stata_code/rdpermute.ado#L254
+    # manual = enum.auto()  # https://github.com/ganong-noel/rdpermute/blob/8ae72bc299e496b48cd0a5203330cb4656c3922a/stata_code/rdpermute.ado#L392
     cct = enum.auto()
+
+
+class EstimationProcedure(enum.Enum):
+    conventional = 'Conventional'
+    biascorrected = 'Bias-corrected'
+    robust = 'Robust'
+
+
+class Bound(enum.Enum):
+    left = -1
+    right = 1

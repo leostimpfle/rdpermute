@@ -1,3 +1,5 @@
 # rdpermute
 
-Perform permutation test proposed by [Ganong and Jäger (2018)](https://www.tandfonline.com/doi/full/10.1080/01621459.2017.1328356)
+Python package to perform the regression kink design (RKD) permutation test proposed by [Ganong and Jäger (2018)](https://www.tandfonline.com/doi/full/10.1080/01621459.2017.1328356).
+
+This package is inspired by the Stata package of the same name [`rdpermute`](https://github.com/ganong-noel/rdpermute) relying heavily on the excellent [`rdrobust`](https://github.com/rdpackages/rdrobust). Contrary to the Stata package [`rdpermute`](https://github.com/ganong-noel/rdpermute), this package implements confidence intervals based on randomization inference following the algorithm proposed by [Ganong and Jäger (2018)](https://www.tandfonline.com/doi/full/10.1080/01621459.2017.1328356) (see Appendix C).  It also uses Python's [`multiprocessing`](https://docs.python.org/3/library/multiprocessing.html) resulting in better performance compared to the Stata package.

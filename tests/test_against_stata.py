@@ -4,7 +4,8 @@ import pandas as pd
 
 import tests
 import rdpermute
-from rdpermute.enums import RegressionType, BwSelectRdpermute, PolynomialDegree
+from rdpermute.enums import RegressionType, BwSelectRdpermute, \
+    PolynomialDegree, MassPoints
 
 
 def _stata_command(
@@ -93,6 +94,7 @@ def _test(
         ),
         regression_type=command_kwargs['regression_type'],
         polynomial_degree=command_kwargs['polynomial_degree'],
+        masspoints=MassPoints.adjust,
     )
     # assert results are sufficiently close
     correspondence = {
