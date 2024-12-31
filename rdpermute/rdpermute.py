@@ -24,6 +24,7 @@ def rdpermute(
         bandwidth: typing.Optional[float] = None,
         bandwidth_selector: BandwidthSelector = BandwidthSelector.mse,
         bandwidth_selector_function: BandwidthSelectorFunction = BandwidthSelectorFunction.rd,
+        regularization: float = 1.0,
         vce: Vce = Vce.nn,
         nnmatch: int = 3,
         fuzzy: typing.Optional[np.typing.ArrayLike] = None,
@@ -63,6 +64,8 @@ def rdpermute(
         The bandwidth selection procedure (Calonico et al, 2020) <https://doi.org/10.1093/ectj/utz022>
     bandwidth_selector_function: BandwidthSelectorFunction
         The bandwidth selector function
+    regularization: float
+        Scaling factor for regularization term
     vce: Vce
         The procedure used to compute the variance-covariance matrix estimator
     nnmatch: int
@@ -99,6 +102,7 @@ def rdpermute(
         bandwidth=bandwidth,
         bandwidth_selector=bandwidth_selector,
         bandwidth_selector_function=bandwidth_selector_function,
+        regularization=regularization,
         vce=vce,
         nnmatch=nnmatch,
         fuzzy=fuzzy,
