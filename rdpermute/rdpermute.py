@@ -105,18 +105,19 @@ def rdpermute(
         masspoints=masspoints,
         estimation=estimation,
     )
-    # invert permutation test to construct confidence intervals
-    confidence_interval = _randomization_interval(
-        y=y,
-        x=x,
-        true_cutoff=true_cutoff,
-        placebos=placebos,
-        beta_asymptotic=results.loc[r'$\beta_1$'],
-        se_asymptotic=results.loc['SE'],
-        regression_type=regression_type,
-        alpha=alpha,
-    )
-    results = pd.concat([results, confidence_interval], axis=0)
+    if alpha is not None:
+        # invert permutation test to construct confidence intervals
+        confidence_interval = _randomization_interval(
+            y=y,
+            x=x,
+            true_cutoff=true_cutoff,
+            placebos=placebos,
+            beta_asymptotic=results.loc[r'$\beta_1$'],
+            se_asymptotic=results.loc['SE'],
+            regression_type=regression_type,
+            alpha=alpha,
+        )
+        results = pd.concat([results, confidence_interval], axis=0)
     results.rename(estimation.value, inplace=True)
     return results, results_placebos
 
@@ -328,15 +329,8 @@ def _randomization_interval(
         regression_type: RegressionType = RegressionType.RKD,
         alpha: typing.Optional[float] = 0.05,
         size_multiplicator: float = 10,
-        convergence_threshold: typing.Optional[float] = None,
+        convergence_threshold: float = 0.05,
 ) -> pd.Series:
-    # initialise confidence interval
-    confidence_interval = {
-        f'ci {bound.name} {1-alpha:.1%} (randomization)': np.nan for bound in Bound
-    }
-    if alpha is None:
-        # do not calculate confidence interval
-        return pd.Series(confidence_interval)
     # following Appendix C of (Ganong and Jäger, 2018)
     # https://www.tandfonline.com/doi/full/10.1080/01621459.2017.1328356
     # step 1: identify search region
@@ -361,6 +355,7 @@ def _randomization_interval(
             se_asymptotic * scipy.stats.norm.ppf(1 - alpha / 2)
         ) / 10
 
+    confidence_interval = {}
     for bound_enum, bound_value in bounds.items():
         order = bound_enum.value
         interval = [beta_asymptotic, bound_value][::order]  # reverse if left bound
