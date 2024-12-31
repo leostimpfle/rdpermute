@@ -8,3 +8,4 @@ __pycache__
 *.fdb_latexmk
 *.pdf
 *.synctex.gz
+/dist/
