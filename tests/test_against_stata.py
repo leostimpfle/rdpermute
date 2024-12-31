@@ -5,7 +5,7 @@ import pandas as pd
 import tests
 import rdpermute
 from rdpermute.enums import RegressionType, BwSelectRdpermute, \
-    PolynomialDegree, MassPoints
+    PolynomialDegree, MassPoints, EstimationProcedure
 
 
 def _stata_command(
@@ -61,7 +61,8 @@ def _test(
         regression_type: RegressionType,
         polynomial_degree: PolynomialDegree = PolynomialDegree.linear,
         bwselect: BwSelectRdpermute = BwSelectRdpermute.cct,
-        relative_tolerance: float = 1e-1,  # TODO: confirm that this difference is due to difference in Stata and Python versions of rdrobust
+        estimation: EstimationProcedure = EstimationProcedure.robust,
+        relative_tolerance: float = 1e-1,  # TODO: very high tolerance; is this due to differences between the Stata and Python versions of rdrobust?
 ):
     # prepare data and commands
     data = pd.read_stata(os.path.join(tests.path_to_data, fn))
@@ -95,12 +96,14 @@ def _test(
         regression_type=command_kwargs['regression_type'],
         polynomial_degree=command_kwargs['polynomial_degree'],
         masspoints=MassPoints.adjust,
+        estimation=estimation,
+        alpha=None,  # Stata rdpermute does not estimate confidence intervals
     )
     # assert results are sufficiently close
     correspondence = {
-        'e(bw_linear)': ('bandwidth (left)', 'Robust'),
-        'e(kink_beta_linear)': (r'$\beta_1$', 'Robust'),
-        'e(kink_se_linear)': ('SE', 'Robust'),
+        'e(bw_linear)': 'bandwidth (left)',
+        'e(kink_beta_linear)': r'$\beta_1$',
+        'e(kink_se_linear)': 'SE',
     }
     for name_stata, name_python in correspondence.items():
         np.testing.assert_allclose(
@@ -112,7 +115,7 @@ def _test(
 
     np.testing.assert_allclose(
         results_stata['e(pval_linear)'][-1, -1],
-        results_python.loc[(r'$p$-value (randomization)', 'Robust')],
+        results_python.loc[r'$p$-value (randomization)'],
         rtol=relative_tolerance,
         err_msg=f'Randomization inference p-values do not match between Stata and Python'
     )

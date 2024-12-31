@@ -54,7 +54,7 @@ class BwSelectRdpermute(enum.Enum):
 
 class EstimationProcedure(enum.Enum):
     conventional = 'Conventional'
-    biascorrected = 'Bias-corrected'
+    # biascorrected = 'Bias-corrected'
     robust = 'Robust'
 
 
