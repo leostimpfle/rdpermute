@@ -35,7 +35,6 @@ def _stata_command(
             ' '.join(options),
         ]
     )
-    print(command)
     return command
 
 
